@@ -9,7 +9,14 @@ const concat = require('gulp-concat')
 const babelOptions = JSON.parse(fs.readFileSync('./.babelrc', 'utf8'))
 
 const paths = {
-  scripts: [ 'src/index.js', 'src/getDeviceId.js', 'src/havePropsChanged.js', 'src/errors.js', 'src/createBlob.js' ],
+  scripts: [
+    'src/index.js',
+    'src/getDeviceId.js',
+    'src/havePropsChanged.js',
+    'src/errors.js',
+    'src/createBlob.js',
+    'src/styles.js'
+  ],
   worker: 'src/worker.js',
   jsQR: 'node_modules/jsqr/dist/jsQR.js',
   destination: './lib',
