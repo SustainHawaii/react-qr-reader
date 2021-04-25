@@ -14,11 +14,11 @@ const previewStyle = {
   width: '100%',
   height: '100%',
 }
-const videoPreviewStyle = {
+const videoPreviewStyle = (mirrorVideo) => ({
   ...previewStyle,
   objectFit: 'cover',
-  transform: this.state.mirrorVideo ? 'scaleX(-1)' : undefined,
-}
+  transform: mirrorVideo ? 'scaleX(-1)' : undefined,
+})
 const imgPreviewStyle = {
   ...previewStyle,
   objectFit: 'scale-down',

@@ -332,7 +332,7 @@ module.exports = class Reader extends Component {
           {
             legacyMode
               ? <img style={imgPreviewStyle} ref={this.getImgRef} onLoad={onImageLoad} />
-              : <video style={videoPreviewStyle} ref={this.getPreviewRef} />
+              : <video style={videoPreviewStyle(this.state.mirrorVideo)} ref={this.getPreviewRef} />
           }
 
           <canvas style={hiddenStyle} ref={this.getCanvasRef} />
