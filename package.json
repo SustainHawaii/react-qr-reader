@@ -55,5 +55,8 @@
     "jsqr": "^1.2.0",
     "prop-types": "^15.7.2",
     "webrtc-adapter": "^7.2.1"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.4"
   }
 }

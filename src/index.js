@@ -4,6 +4,13 @@ const PropTypes = require('prop-types')
 const { getDeviceId, getFacingModePattern } = require('./getDeviceId')
 const havePropsChanged = require('./havePropsChanged')
 const createBlob = require('./createBlob')
+const {
+  containerStyle,
+  hiddenStyle,
+  videoPreviewStyle,
+  imgPreviewStyle,
+  viewFinderStyle
+} = require('./styles')
 
 // Require adapter to support older browser implementations
 require('webrtc-adapter')
@@ -48,19 +55,6 @@ module.exports = class Reader extends Component {
     this.state = {
       mirrorVideo: false,
     }
-
-    // Bind function to the class
-    this.initiate = this.initiate.bind(this)
-    this.initiateLegacyMode = this.initiateLegacyMode.bind(this)
-    this.check = this.check.bind(this)
-    this.handleVideo = this.handleVideo.bind(this)
-    this.handleLoadStart = this.handleLoadStart.bind(this)
-    this.handleInputChange = this.handleInputChange.bind(this)
-    this.clearComponent = this.clearComponent.bind(this)
-    this.handleReaderLoad = this.handleReaderLoad.bind(this)
-    this.openImageDialog = this.openImageDialog.bind(this)
-    this.handleWorkerMessage = this.handleWorkerMessage.bind(this)
-    this.setRefFactory = this.setRefFactory.bind(this)
   }
   componentDidMount() {
     // Initiate web worker execute handler according to mode.
@@ -78,18 +72,18 @@ module.exports = class Reader extends Component {
     const changedProps = havePropsChanged(this.props, nextProps, propsKeys)
 
     for (const prop of changedProps) {
-      if (prop == 'facingMode') {
+      if (prop === 'facingMode') {
         this.clearComponent()
         this.initiate(nextProps)
         break
-      } else if (prop == 'delay') {
-        if (this.props.delay == false && !nextProps.legacyMode) {
+      } else if (prop === 'delay') {
+        if (this.props.delay === false && !nextProps.legacyMode) {
           this.timeout = setTimeout(this.check, nextProps.delay)
         }
-        if (nextProps.delay == false) {
+        if (nextProps.delay === false) {
           clearTimeout(this.timeout)
         }
-      } else if (prop == 'legacyMode') {
+      } else if (prop === 'legacyMode') {
         if (this.props.legacyMode && !nextProps.legacyMode) {
           this.clearComponent()
           this.initiate(nextProps)
@@ -118,7 +112,7 @@ module.exports = class Reader extends Component {
     }
     this.clearComponent()
   }
-  clearComponent() {
+  clearComponent = () => {
     // Remove all event listeners and variables
     if (this.timeout) {
       clearTimeout(this.timeout)
@@ -134,7 +128,7 @@ module.exports = class Reader extends Component {
       this.els.img.removeEventListener('load', this.check)
     }
   }
-  initiate(props = this.props) {
+  initiate = (props = this.props) => {
     const { onError, facingMode } = props
 
     // Check browser facingMode constraint support
@@ -162,7 +156,7 @@ module.exports = class Reader extends Component {
       .then(this.handleVideo)
       .catch(onError)
   }
-  handleVideo(stream) {
+  handleVideo = (stream) => {
     const { preview } = this.els
     const { facingMode } = this.props
 
@@ -193,9 +187,9 @@ module.exports = class Reader extends Component {
 
     preview.addEventListener('loadstart', this.handleLoadStart)
 
-    this.setState({ mirrorVideo: facingMode == 'user', streamLabel: streamTrack.label })
+    this.setState({ mirrorVideo: facingMode === 'user', streamLabel: streamTrack.label })
   }
-  handleLoadStart() {
+  handleLoadStart = () => {
     const { delay, onLoad } = this.props
     const { mirrorVideo, streamLabel } = this.state
     const preview = this.els.preview
@@ -212,7 +206,7 @@ module.exports = class Reader extends Component {
     // Some browsers call loadstart continuously
     preview.removeEventListener('loadstart', this.handleLoadStart)
   }
-  check() {
+  check = () => {
     const { legacyMode, resolution, delay } = this.props
     const { preview, canvas, img } = this.els
 
@@ -267,7 +261,7 @@ module.exports = class Reader extends Component {
       this.timeout = setTimeout(this.check, delay)
     }
   }
-  handleWorkerMessage(e) {
+  handleWorkerMessage = (e) => {
     const { onScan, legacyMode, delay } = this.props
     const decoded = e.data
     onScan(decoded || null)
@@ -276,7 +270,7 @@ module.exports = class Reader extends Component {
       this.timeout = setTimeout(this.check, delay)
     }
   }
-  initiateLegacyMode() {
+  initiateLegacyMode = () => {
     this.reader = new FileReader()
     this.reader.addEventListener('load', this.handleReaderLoad)
     this.els.img.addEventListener('load', this.check, false)
@@ -288,23 +282,24 @@ module.exports = class Reader extends Component {
       this.props.onLoad()
     }
   }
-  handleInputChange(e) {
+  handleInputChange = (e) => {
     const selectedImg = e.target.files[0]
     this.reader.readAsDataURL(selectedImg)
   }
-  handleReaderLoad(e) {
+  handleReaderLoad = (e) => {
     // Set selected image blob as img source
     this.els.img.src = e.target.result
   }
-  openImageDialog() {
+  openImageDialog = () => {
     // Function to be executed by parent in user action context to trigger img file uploader
     this.els.input.click()
   }
-  setRefFactory(key) {
-    return element => {
-      this.els[key] = element
-    }
-  }
+
+  getCanvasRef = (el) => this.els.canvas = el
+  getInputRef = (el) => this.els.input = el
+  getImgRef = (el) => this.els.img = el
+  getPreviewRef = (el) => this.els.preview = el
+
   render() {
     const {
       style,
@@ -314,44 +309,6 @@ module.exports = class Reader extends Component {
       showViewFinder,
       facingMode
     } = this.props
-
-    const containerStyle = {
-      overflow: 'hidden',
-      position: 'relative',
-      width: '100%',
-      paddingTop: '100%',
-    }
-    const hiddenStyle = { display: 'none' }
-    const previewStyle = {
-      top: 0,
-      left: 0,
-      display: 'block',
-      position: 'absolute',
-      overflow: 'hidden',
-      width: '100%',
-      height: '100%',
-    }
-    const videoPreviewStyle = {
-      ...previewStyle,
-      objectFit: 'cover',
-      transform: this.state.mirrorVideo ? 'scaleX(-1)' : undefined,
-    }
-    const imgPreviewStyle = {
-      ...previewStyle,
-      objectFit: 'scale-down',
-    }
-
-    const viewFinderStyle = {
-      top: 0,
-      left: 0,
-      zIndex: 1,
-      boxSizing: 'border-box',
-      border: '50px solid rgba(0, 0, 0, 0.3)',
-      boxShadow: 'inset 0 0 0 5px rgba(255, 0, 0, 0.5)',
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-    }
 
     return (
       <section className={className} style={style}>
@@ -367,18 +324,18 @@ module.exports = class Reader extends Component {
                 style={hiddenStyle}
                 type="file"
                 accept="image/*"
-                ref={this.setRefFactory('input')}
+                ref={this.getInputRef}
                 onChange={this.handleInputChange}
               />
               : null
           }
           {
             legacyMode
-              ? <img style={imgPreviewStyle} ref={this.setRefFactory('img')} onLoad={onImageLoad} />
-              : <video style={videoPreviewStyle} ref={this.setRefFactory('preview')} />
+              ? <img style={imgPreviewStyle} ref={this.getImgRef} onLoad={onImageLoad} />
+              : <video style={videoPreviewStyle} ref={this.getPreviewRef} />
           }
 
-          <canvas style={hiddenStyle} ref={this.setRefFactory('canvas')} />
+          <canvas style={hiddenStyle} ref={this.getCanvasRef} />
         </section>
       </section>
     )
