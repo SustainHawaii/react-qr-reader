@@ -1,6 +1,6 @@
 {
   "name": "react-qr-reader",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "A react component for reading QR codes from the webcam.",
   "main": "./lib/index.js",
   "scripts": {
@@ -52,7 +52,7 @@
     "react-dom": "~16"
   },
   "dependencies": {
-    "jsqr": "^1.2.0",
+    "jsqr": "^1.4.0",
     "prop-types": "^15.7.2",
     "webrtc-adapter": "^7.2.1"
   },
